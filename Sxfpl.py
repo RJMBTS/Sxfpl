@@ -1,4 +1,4 @@
-name: Sxfpl Master
+name: Sxfpl
 
 on:
   schedule:
