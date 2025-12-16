@@ -138,7 +138,7 @@ jobs:
 
           # ---------------- SAVE (HEADERS UNCHANGED) ----------------
           header = [
-              '#EXTM3U billed-msg="AU Live - Shivansh Playlists"',
+              '#EXTM3U billed-msg="AU Live - Made for Sidhant"',
               "# Scripted & Updated by Kittujk",
               f"# Channels : Total - {total_channels} | Updated - {updated_channels}",
               f"# Last Updated : {updated_time}",
