@@ -2,7 +2,7 @@ name: Sxfpl Australian 🎯
 
 on:
   schedule:
-    - cron: '0 */6 * * *'   # Every 6 hours
+    - cron: '0 */6 * * *'
   workflow_dispatch:
   push:
     branches:
@@ -29,7 +29,7 @@ jobs:
         run: |
           pip install requests
 
-      - name: Generate Australia Live playlist
+      - name: Generate Australia Live playlist (Network wise)
         env:
           IPTV_USER: ${{ secrets.IPTV_USER }}
           IPTV_PASS: ${{ secrets.IPTV_PASS }}
@@ -64,15 +64,27 @@ jobs:
               return re.search(r'group-title="[^"]*australia[^"]*"', line, re.I)
 
           def is_live(url, line):
-              return (
-                  "/live/" in url.lower()
-                  or url.lower().endswith(".ts")
-                  or "live" in line.lower()
-              )
+              return "/live/" in url.lower() or url.lower().endswith(".ts") or "live" in line.lower()
 
-          def set_group(meta):
+          def detect_network(name):
+              n = name.upper()
+              if "ABC" in n:
+                  return "ABC"
+              if "SBS" in n:
+                  return "SBS"
+              if "SEVEN" in n or re.search(r'\b7\b', n):
+                  return "SEVEN"
+              if "NINE" in n or re.search(r'\b9\b', n):
+                  return "NINE"
+              if "TEN" in n or re.search(r'\b10\b', n):
+                  return "TEN"
+              if "FOX" in n:
+                  return "FOX"
+              return "OTHER"
+
+          def set_group(meta, network):
               meta = re.sub(r'group-title=".*?"', '', meta)
-              return f'{meta} group-title="Australia"'
+              return f'{meta} group-title="AU | {network}"'
 
           def load_old_urls(path):
               if not os.path.exists(path):
@@ -109,10 +121,12 @@ jobs:
               if 'tvg-logo=' not in meta:
                   meta += f' tvg-logo="{DEFAULT_LOGO}"'
 
-              meta = set_group(" ".join(meta.split()))
-              name = " ".join(name.replace("_", " ").replace("-", " ").split()).title()
+              name_clean = " ".join(name.replace("_", " ").replace("-", " ").split()).title()
+              network = detect_network(name_clean)
 
-              items.append((f"{meta},{name}", url))
+              meta = set_group(" ".join(meta.split()), network)
+
+              items.append((f"{meta},{name_clean}", url))
               new_urls.add(url)
 
           # ---------------- STATS ----------------
@@ -122,7 +136,7 @@ jobs:
           now = datetime.now(timezone.utc) + timedelta(hours=5, minutes=30)
           updated_time = now.strftime("%Y-%m-%d %H:%M IST")
 
-          # ---------------- SAVE ----------------
+          # ---------------- SAVE (HEADERS UNCHANGED) ----------------
           header = [
               '#EXTM3U billed-msg="AU Live - Shivansh Playlists"',
               "# Scripted & Updated by Kittujk",
@@ -134,10 +148,7 @@ jobs:
           with open(OUTPUT_FILE, "w", encoding="utf-8") as f:
               f.write("\n".join(header + [x for item in items for x in item]))
 
-          print(
-              f"Generated {OUTPUT_FILE} | "
-              f"Total: {total_channels} | Updated: {updated_channels}"
-          )
+          print(f"Generated {OUTPUT_FILE} | Total={total_channels} | Updated={updated_channels}")
           EOF
 
       - name: Commit and push
@@ -145,5 +156,5 @@ jobs:
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
           git add Sxfpl/Au.m3u
-          git commit -m "Update AU Live playlist" || echo "No changes"
+          git commit -m "Update AU Live playlist (Network wise)" || echo "No changes"
           git push
