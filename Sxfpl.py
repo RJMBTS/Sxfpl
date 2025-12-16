@@ -43,6 +43,9 @@ jobs:
           USERNAME = os.getenv("IPTV_USER")
           PASSWORD = os.getenv("IPTV_PASS")
 
+          if not USERNAME or not PASSWORD:
+              raise SystemExit("❌ IPTV_USER or IPTV_PASS not set")
+
           PLAYLIST_URL = f"{HOST_URL}/get.php?username={USERNAME}&password={PASSWORD}&type=m3u_plus&output=ts"
           OUTPUT_DIR = "Sxfpl"
           OUTPUT_FILE = os.path.join(OUTPUT_DIR, "Au.m3u")
@@ -117,5 +120,5 @@ jobs:
           git config user.name "github-actions"
           git config user.email "actions@github.com"
           git add Sxfpl/Au.m3u
-          git commit -m "Update Australia Live IPTV (Au.m3u)"
+          git commit -m "Update Australia Live IPTV (Au.m3u)" || echo "No changes to commit"
           git push
