@@ -38,10 +38,11 @@ jobs:
           import os, re, requests
           from datetime import datetime, timedelta, timezone
 
-          # -------- CONFIG --------
+          # ---------------- CONFIG ----------------
           HOST_URL = "https://webhop.live"
           USERNAME = os.getenv("IPTV_USER")
           PASSWORD = os.getenv("IPTV_PASS")
+
           OUTPUT_DIR = "Sxfpl"
           OUTPUT_FILE = f"{OUTPUT_DIR}/Au.m3u"
           DEFAULT_LOGO = "https://simgbb.com/avatar/dw9KLnpdGh3y.jpg"
@@ -57,18 +58,22 @@ jobs:
               "&type=m3u_plus&output=ts"
           )
 
-          # -------- HELPERS --------
-          def is_au(line):
+          # ---------------- HELPERS ----------------
+          def is_australia(line):
               return re.search(r'group-title="[^"]*australia[^"]*"', line, re.I)
 
           def is_live(url, line):
-              return "/live/" in url.lower() or url.lower().endswith(".ts") or "live" in line.lower()
+              return (
+                  "/live/" in url.lower()
+                  or url.lower().endswith(".ts")
+                  or "live" in line.lower()
+              )
 
           def set_group(meta):
               meta = re.sub(r'group-title=".*?"', '', meta)
               return f'{meta} group-title="RJM | Australia Live"'
 
-          # -------- FETCH --------
+          # ---------------- FETCH ----------------
           r = requests.get(PLAYLIST_URL, timeout=30)
           r.raise_for_status()
           lines = r.text.splitlines()
@@ -78,7 +83,7 @@ jobs:
           for i in range(len(lines)):
               if not lines[i].startswith("#EXTINF"):
                   continue
-              if not is_au(lines[i]):
+              if not is_australia(lines[i]):
                   continue
               if i + 1 >= len(lines):
                   continue
@@ -87,7 +92,8 @@ jobs:
               if not is_live(url, lines[i]):
                   continue
 
-              meta, name = re.sub(r'(tvg-name|group-title)=".*?"', '', lines[i]).rsplit(",", 1)
+              line = re.sub(r'(tvg-name|group-title)=".*?"', '', lines[i])
+              meta, name = line.rsplit(",", 1)
 
               if 'tvg-logo=' not in meta:
                   meta += f' tvg-logo="{DEFAULT_LOGO}"'
@@ -97,20 +103,22 @@ jobs:
 
               items.append((f"{meta},{name}", url))
 
-          # -------- SAVE --------
+          # ---------------- SAVE ----------------
           now = datetime.now(timezone.utc) + timedelta(hours=5, minutes=30)
+          updated_time = now.strftime("%Y-%m-%d %H:%M IST")
+          total_channels = len(items)
+
           header = [
-              '#EXTM3U billed-msg="RJM Tv - RJMBTS Network"',
-              "# RJMS - RJMBTS Network",
+              '#EXTM3U billed-msg="Au Live - By Shivansh Playlists"',
               "# Scripted & Updated by Kittujk",
-              f"# Last Updated: {now.strftime('%Y-%m-%d %H:%M:%S IST')}",
+              f"# Channels : Total - {total_channels} | Updated - {updated_time}",
               ""
           ]
 
           with open(OUTPUT_FILE, "w", encoding="utf-8") as f:
               f.write("\n".join(header + [x for item in items for x in item]))
 
-          print(f"Generated {OUTPUT_FILE} ({len(items)} channels)")
+          print(f"Generated {OUTPUT_FILE} | Total Channels: {total_channels}")
           EOF
 
       - name: Commit and push
@@ -118,5 +126,5 @@ jobs:
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
           git add Sxfpl/Au.m3u
-          git commit -m "Update AU Live playlist" || echo "No changes"
+          git commit -m "Update AU Live playlist (Au.m3u)" || echo "No changes"
           git push
