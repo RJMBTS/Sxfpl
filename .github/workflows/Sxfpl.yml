@@ -1,4 +1,4 @@
-- name: Sxfpl Master 🎳
+- name: Run Australia Live Filter
   env:
     IPTV_USER: ${{ secrets.IPTV_USER }}
     IPTV_PASS: ${{ secrets.IPTV_PASS }}
