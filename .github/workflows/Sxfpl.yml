@@ -1,4 +1,4 @@
-name: Sxfpl - Australian 🎯
+name: Sxfpl Australian 🎯
 
 on:
   schedule:
@@ -45,7 +45,8 @@ jobs:
 
           OUTPUT_DIR = "Sxfpl"
           OUTPUT_FILE = f"{OUTPUT_DIR}/Au.m3u"
-          DEFAULT_LOGO = "https://simgbb.com/avatar/dw9KLnpdGh3y.jpg"
+
+          DEFAULT_LOGO = "https://i.postimg.cc/MZftPYPB/IMG-20250710-192112-387.jpg"
 
           if not USERNAME or not PASSWORD:
               raise SystemExit("IPTV credentials not set")
@@ -73,12 +74,22 @@ jobs:
               meta = re.sub(r'group-title=".*?"', '', meta)
               return f'{meta} group-title="RJM | Australia Live"'
 
+          def load_old_urls(path):
+              if not os.path.exists(path):
+                  return set()
+              with open(path, "r", encoding="utf-8") as f:
+                  return {line.strip() for line in f if line.startswith("http")}
+
+          # ---------------- LOAD OLD DATA ----------------
+          old_urls = load_old_urls(OUTPUT_FILE)
+
           # ---------------- FETCH ----------------
           r = requests.get(PLAYLIST_URL, timeout=30)
           r.raise_for_status()
           lines = r.text.splitlines()
 
           items = []
+          new_urls = set()
 
           for i in range(len(lines)):
               if not lines[i].startswith("#EXTINF"):
@@ -102,23 +113,31 @@ jobs:
               name = " ".join(name.replace("_", " ").replace("-", " ").split()).title()
 
               items.append((f"{meta},{name}", url))
+              new_urls.add(url)
 
-          # ---------------- SAVE ----------------
+          # ---------------- STATS ----------------
+          total_channels = len(new_urls)
+          updated_channels = len(new_urls - old_urls)
+
           now = datetime.now(timezone.utc) + timedelta(hours=5, minutes=30)
           updated_time = now.strftime("%Y-%m-%d %H:%M IST")
-          total_channels = len(items)
 
+          # ---------------- SAVE ----------------
           header = [
-              '#EXTM3U billed-msg="Au Live - By Shivansh Playlists"',
+              '#EXTM3U billed-msg="AU Live - Shivansh Playlists"',
               "# Scripted & Updated by Kittujk",
-              f"# Channels : Total - {total_channels} | Updated - {updated_time}",
+              f"# Channels : Total - {total_channels} | Updated - {updated_channels}",
+              f"# Last Updated : {updated_time}",
               ""
           ]
 
           with open(OUTPUT_FILE, "w", encoding="utf-8") as f:
               f.write("\n".join(header + [x for item in items for x in item]))
 
-          print(f"Generated {OUTPUT_FILE} | Total Channels: {total_channels}")
+          print(
+              f"Generated {OUTPUT_FILE} | "
+              f"Total: {total_channels} | Updated: {updated_channels}"
+          )
           EOF
 
       - name: Commit and push
@@ -126,5 +145,5 @@ jobs:
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
           git add Sxfpl/Au.m3u
-          git commit -m "Update AU Live playlist (Au.m3u)" || echo "No changes"
+          git commit -m "Update AU Live playlist" || echo "No changes"
           git push
