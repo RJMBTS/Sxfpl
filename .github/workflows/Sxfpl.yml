@@ -72,7 +72,7 @@ jobs:
 
           def set_group(meta):
               meta = re.sub(r'group-title=".*?"', '', meta)
-              return f'{meta} group-title="RJM | Australia Live"'
+              return f'{meta} group-title="Australia"'
 
           def load_old_urls(path):
               if not os.path.exists(path):
