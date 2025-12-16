@@ -1,7 +1,6 @@
-#EXTM3U billed-msg="RJM Tv - RJMBTS Network"
-# RJMS - RJMBTS Network
+#EXTM3U billed-msg="Au Live - By Shivansh Playlists"
 # Scripted & Updated by Kittujk
-# Last Updated: 2025-12-17 00:04:12 IST
+# Channels : Total - 669 | Updated - 2025-12-17 00:09 IST
 
 #EXTINF:-1 tvg-id="foxsports501hd.au" tvg-logo="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRuR_kF8fYxhcL_qxXuR6697bxKFmLcEJUpmoN_yP4iTTHmO2sLqrduhl-iWKvEJ7IcOrk&usqp=CAU" group-title="RJM | Australia Live",Au: Fox Sports 501
 https://webhop.live:443/live/juno123/juno123/4748.ts
