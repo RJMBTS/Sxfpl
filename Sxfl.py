@@ -1,4 +1,4 @@
-name: Australia Live IPTV 🇦🇺
+name: Sxfpl 🎳
 
 on:
   schedule:
