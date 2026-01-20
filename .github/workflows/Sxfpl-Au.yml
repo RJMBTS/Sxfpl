@@ -30,10 +30,8 @@ jobs:
           pip install requests
 
       - name: Generate Australia Live playlist (Network wise)
-        env:
-          IPTV_USER: ${{ secrets.IPTV_USER }}
-          IPTV_PASS: ${{ secrets.IPTV_PASS }}
         run: |
+
           python << 'EOF'
           import os, re, requests
           from datetime import datetime, timedelta, timezone
