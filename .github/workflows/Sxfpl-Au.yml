@@ -39,9 +39,10 @@ jobs:
           from datetime import datetime, timedelta, timezone
 
           # ---------------- CONFIG ----------------
-          HOST_URL = "https://webhop.live"
-          USERNAME = os.getenv("IPTV_USER")
-          PASSWORD = os.getenv("IPTV_PASS")
+          HOST_URL = "https://dhoomtv.xyz:443"
+          USERNAME = "P4B9TB9xR8"
+          PASSWORD = "humongous2tonight"
+
 
           OUTPUT_DIR = "Sxfpl"
           OUTPUT_FILE = f"{OUTPUT_DIR}/Au.m3u"
